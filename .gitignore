@@ -1,3 +1,4 @@
 *.log
 kashir_go
 kashir_go.exe
+.env

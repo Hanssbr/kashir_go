@@ -2,27 +2,51 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"kashir_go/database"
+	"kashir_go/models"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
-type Produk struct {
-	ID    int    `json:"id"`
-	Nama  string `json:"nama"`
-	Harga int    `json:"harga"`
-	Stok  int    `json:"stok"`
+
+
+type Config struct {
+	Port string `mapstructure:"PORT"`
+	DBConn string `mapstructure:"DB_CONN"`
 }
 
-var produk = []Produk{
-	{ID: 1, Nama: "Indomie Godog", Harga: 3500, Stok: 10},
-	{ID: 2, Nama: "Indomie Rebus", Harga: 3000, Stok: 40},
-	{ID: 3, Nama: "Indomie Goreng", Harga: 35000, Stok: 20},
+var produk = []models.Produk{
+	{ID: 1, Name: "Indomie Godog", Price: 3500, Stock: 10},
+	{ID: 2, Name: "Indomie Rebus", Price: 3000, Stock: 40},
+	{ID: 3, Name: "Indomie Goreng", Price: 35000, Stock: 20},
 }
 
 func main() {
+
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if _, err := os.Stat(".env"); err == nil {
+		viper.SetConfigFile(".env")
+		_ = viper.ReadInConfig()
+	}
+
+	config := Config{
+		Port: viper.GetString("PORT"),
+		DBConn: viper.GetString("DB_CONN"),
+	}
+
+	db, err := database.InitDB(config.DBConn)
+	if err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+	defer db.Close()
 
 	// routing id
 	http.HandleFunc("/api/produk/", func(w http.ResponseWriter, r *http.Request) {
@@ -65,13 +89,12 @@ func main() {
 		})
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080" // fallback lokal
-	}
+	fmt.Println("Server running di localhost:" + config.Port)
 
-	log.Println("Server running on port", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	err = http.ListenAndServe(":"+config.Port, nil)
+	if err != nil {
+		fmt.Println("gagal running server")
+	}
 }
 
 func getProdukByID(w http.ResponseWriter, r *http.Request) {
