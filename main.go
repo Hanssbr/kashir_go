@@ -69,8 +69,8 @@ func main() {
 
 
 	// setup routes category
-	http.HandleFunc("/categories", categoryHandler.Router)
-	http.HandleFunc("/categories/", categoryHandler.Router)
+	http.HandleFunc("/categories", categoryHandler.HandleCategories)
+	http.HandleFunc("/categories/", categoryHandler.HandleCategoriesByID)
 
 
 	// Setup routes produk
