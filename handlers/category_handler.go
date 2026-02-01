@@ -66,10 +66,13 @@ func (h *CategoryHandler) HandleCategoriesByID(w http.ResponseWriter, r *http.Re
 		h.GetByID(w, r)
 	case http.MethodPut:
 		h.Update(w, r)
-	case http.MethodDelete:
-		h.Delete(w, r)
-	default:
+	case http.MethodPost:
+		if strings.HasSuffix(r.URL.Path, "/delete") {
+			h.Delete(w, r)
+			return
+		}
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+
 	}
 }
 
@@ -138,4 +141,3 @@ func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		"message": "Category deleted successfully",
 	})
 }
-
