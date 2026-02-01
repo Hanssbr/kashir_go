@@ -138,3 +138,33 @@ func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		"message": "Category deleted successfully",
 	})
 }
+
+func (h *CategoryHandler) Router(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/categories" {
+		switch r.Method {
+		case http.MethodGet:
+			h.GetAll(w, r)
+		case http.MethodPost:
+			h.Create(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+
+	if strings.HasPrefix(r.URL.Path, "/categories/") {
+		switch r.Method {
+		case http.MethodGet:
+			h.GetByID(w, r)
+		case http.MethodPatch:
+			h.Update(w, r)
+		case http.MethodDelete:
+			h.Delete(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+
+	http.NotFound(w, r)
+}
